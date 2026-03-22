@@ -1,0 +1,102 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}– Mein Profil{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Mein <em>Profil</em></h1>
+    <p>Verwalte deine persönlichen Informationen.</p>
+</div>
+
+<div class="detail-grid">
+    <!-- LEFT: Profil Info -->
+    <div>
+        <div class="detail-info-card">
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="Avatar" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); margin-bottom:1rem;">
+                {% else %}
+                <div style="width:80px; height:80px; border-radius:50%; background:var(--surface2); border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:2rem;">
+                    🎬
+                </div>
+                {% endif %}
+                <h2 style="font-family:'Playfair Display',serif; font-size:1.25rem;">{{ request.user.username }}</h2>
+                <p style="color:var(--text-muted); font-size:0.875rem;">{{ request.user.email }}</p>
+            </div>
+
+            <hr class="divider">
+
+            {% if profile.bio %}
+            <p style="color:var(--text); font-style:italic; line-height:1.7; font-size:0.9rem; margin-bottom:1rem;">„{{ profile.bio }}"</p>
+            <hr class="divider">
+            {% endif %}
+
+            {% if profile.favorite_genre %}
+            <div class="detail-field">
+                <span class="detail-field-label">Lieblingsgenre</span>
+                <span class="detail-field-value">{{ profile.favorite_genre }}</span>
+            </div>
+            {% endif %}
+            {% if profile.favorite_movie %}
+            <div class="detail-field">
+                <span class="detail-field-label">Lieblingsfilm</span>
+                <span class="detail-field-value">{{ profile.favorite_movie }}</span>
+            </div>
+            {% endif %}
+            {% if profile.favorite_actor %}
+            <div class="detail-field">
+                <span class="detail-field-label">Lieblingsschauspieler</span>
+                <span class="detail-field-value">{{ profile.favorite_actor }}</span>
+            </div>
+            {% endif %}
+            {% if profile.favorite_director %}
+            <div class="detail-field">
+                <span class="detail-field-label">Lieblingsregisseur</span>
+                <span class="detail-field-value">{{ profile.favorite_director }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT: Profil bearbeiten -->
+    <div>
+        <div class="detail-info-card">
+            <h2 style="font-family:'Playfair Display',serif; font-size:1.25rem; margin-bottom:1.5rem;">Profil bearbeiten</h2>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Profilbild</label>
+                    {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Avatar" style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:0.5rem; display:block;">
+                    {% endif %}
+                    <input type="file" name="avatar" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea name="bio" rows="3" placeholder="Schreib etwas über dich...">{{ profile.bio|default:'' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Lieblingsgenre</label>
+                    <input type="text" name="genre" placeholder="z.B. Thriller, Drama..." value="{{ profile.favorite_genre|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>Lieblingsfilm</label>
+                    <input type="text" name="favorite_movie" placeholder="z.B. The Dark Knight..." value="{{ profile.favorite_movie|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>Lieblingsschauspieler</label>
+                    <input type="text" name="favorite_actor" placeholder="z.B. Christian Bale..." value="{{ profile.favorite_actor|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>Lieblingsregisseur</label>
+                    <input type="text" name="favorite_director" placeholder="z.B. Christopher Nolan..." value="{{ profile.favorite_director|default:'' }}">
+                </div>
+                <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center; margin-top:0.5rem;">
+                    Profil speichern
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}– Login{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Willkommen <em style="color:var(--gold); font-style:italic;">zurück</em></h2>
+        <p>Logge dich ein um deine Filmsammlung zu sehen.</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p style="color:var(--red); font-size:0.8rem; margin-top:0.4rem;">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center; margin-top:0.5rem;">
+                Einloggen
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Noch kein Konto? <a href="{% url 'register' %}">Registrieren</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

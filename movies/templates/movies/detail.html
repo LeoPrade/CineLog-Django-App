@@ -1,0 +1,105 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}– {{ movie.title }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.5rem;">
+    <a href="{% url 'movie_list' %}" class="btn btn-ghost" style="font-size:0.8rem;">← Zurück</a>
+</div>
+
+<div class="detail-grid">
+    <!-- LEFT: Film Info -->
+    <div>
+        <div class="detail-info-card">
+            <h1 class="detail-title">{{ movie.title }}</h1>
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.5rem;">{{ movie.release_year }}</p>
+
+            <span class="rating-badge" style="margin-bottom:1.5rem; display:inline-flex;">⭐ {{ movie.imdb_rating }} IMDb</span>
+
+            <div style="margin-top:1rem;">
+                <div class="detail-field">
+                    <span class="detail-field-label">Genre</span>
+                    <span class="detail-field-value">{{ movie.genre }}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-field-label">Regisseur</span>
+                    <span class="detail-field-value">{{ movie.director }}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-field-label">IMDb Votes</span>
+                    <span class="detail-field-value">{{ movie.imdb_votes|default:"–" }}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-field-label">IMDb ID</span>
+                    <span class="detail-field-value" style="color:var(--text-muted);">{{ movie.imdb_id }}</span>
+                </div>
+                {% if movie.awards %}
+                <div class="detail-field">
+                    <span class="detail-field-label">Awards</span>
+                    <span class="detail-field-value">{{ movie.awards }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-top:1.75rem;">
+                <a href="https://www.imdb.com/title/{{ movie.imdb_id }}/" target="_blank" class="btn btn-ghost" style="width:100%; justify-content:center; margin-bottom:0.75rem;">
+                    🔗 Auf IMDb ansehen
+                </a>
+                {% if review %}
+                <form method="POST" action="{% url 'movie_delete' movie.id %}" onsubmit="return confirm('Film wirklich löschen?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="width:100%; justify-content:center;">
+                        🗑 Film löschen
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Reviews -->
+    <div>
+        <div class="detail-info-card">
+            <h2 style="font-family:'Playfair Display',serif; font-size:1.25rem; margin-bottom:1.5rem;">Meine Bewertung</h2>
+
+            {% if review %}
+            <div style="margin-bottom:1.5rem;">
+                {% if review.personal_rating %}
+                <span class="rating-badge" style="font-size:1rem; padding:0.5rem 1rem;">
+                    ⭐ {{ review.personal_rating }} / 10
+                </span>
+                {% endif %}
+                {% if review.comment %}
+                <p style="margin-top:1rem; color:var(--text); font-style:italic; line-height:1.6;">
+                    {% if review.comment %}
+                        „{{ review.comment }}"
+                    {% endif %}
+                </p>
+                {% endif %}
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
+                    {{ review.created_at|date:"d. F Y" }}
+                </p>
+            </div>
+            <hr class="divider">
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Deine Bewertung (0.0 – 10.0)</label>
+                    <input type="number" name="personal_rating" min="0" max="10" step="0.1"
+                        placeholder="z.B. 8.5"
+                        value="{% if review %}{{ review.personal_rating }}{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>Kommentar</label>
+                    <textarea name="comment" rows="4" placeholder="Was denkst du über diesen Film?">{% if review %}{% if review.comment %}{{ review.comment }}{% endif %}{% endif %}</textarea>
+                </div>
+                <button type="submit" class="btn btn-gold">
+                    {% if review %}Bewertung aktualisieren{% else %}Bewertung speichern{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

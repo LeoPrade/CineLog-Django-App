@@ -1,0 +1,70 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}– Meine Filme{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+    <div>
+        <h1>Meine <em>Filmliste</em></h1>
+        <p>{{ movies|length }} Film{{ movies|length|pluralize:"e" }} in deiner Sammlung</p>
+    </div>
+    <a href="{% url 'movie_add' %}" class="btn btn-gold">+ Film hinzufügen</a>
+</div>
+
+<form method="GET" action="{% url 'movie_list' %}">
+    <div class="search-bar">
+        <input type="text" name="title" placeholder="In meiner Liste suchen..." value="{{ request.GET.title }}" >
+        <button type="submit" class="btn btn-ghost">Suchen</button>
+        {% if request.GET.title %}
+        <a href="{% url 'movie_list' %}" class="btn btn-ghost">✕ Zurücksetzen</a>
+        {% endif %}
+    </div>
+</form>
+
+{% if movies %}
+<div class="movie-grid">
+    {% for movie in movies %}
+    <a href="{% url 'movie_detail' movie.id %}" class="movie-card">
+        <div class="movie-card-body">
+            {% if movie.poster_url %}
+                <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" style="width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:0.75rem;">
+            {% endif %}
+            <div class="movie-card-title">{{ movie.title }}</div>
+            <div class="movie-card-meta">{{ movie.director }} · {{ movie.release_year }}</div>
+            <span class="genre-tag">{{ movie.genre|truncatechars:30 }}</span>
+        </div>
+        <div class="movie-card-footer" style="display:flex; align-items:center; justify-content:space-between;">
+            <span class="rating-badge">⭐ {{ movie.imdb_rating }}</span>
+            <span style="font-size:0.75rem; color:var(--text-muted);">{{ movie.imdb_votes|default:"–" }} Votes</span>
+            <span style="font-size:0.75rem;">
+                {% for review in reviews %}
+                    {% if review.movie == movie %}
+                        {% if review.personal_rating %}
+                            <span style="background:rgba(76,175,125,0.12); border:1px solid rgba(76,175,125,0.25); color:#4caf7d; padding:0.3rem 0.7rem; border-radius:20px; font-weight:500;">
+                                🎬 {{ review.personal_rating }}
+                            </span>
+                        {% else %}
+                            <span style="color:var(--text-muted);">Nicht bewertet</span>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">🎬</div>
+    {% if request.GET.title %}
+    <h3>Kein Film gefunden</h3>
+    <p>„{{ request.GET.title }}" ist nicht in deiner Sammlung.</p>
+    <a href="{% url 'movie_list' %}" class="btn btn-ghost" style="margin-top:1.5rem">Zurücksetzen</a>
+    {% else %}
+    <h3>Noch keine Filme</h3>
+    <p>Füge deinen ersten Film hinzu und starte deine Sammlung.</p>
+    <a href="{% url 'movie_search' %}" class="btn btn-gold" style="margin-top:1.5rem">Film suchen</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

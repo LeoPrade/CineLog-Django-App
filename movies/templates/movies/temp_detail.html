@@ -1,0 +1,83 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}– {{ movie.Title }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.5rem;">
+    <a href="javascript:history.back()" class="btn btn-ghost" style="font-size:0.8rem;">← Zurück</a>
+</div>
+
+<div class="detail-grid">
+    <!-- LEFT: Poster + Aktionen -->
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+        {% if movie.Poster and movie.Poster != 'N/A' %}
+        <img src="{{ movie.Poster }}" alt="{{ movie.Title }}" style="width:100%; border-radius:12px; object-fit:cover;">
+        {% endif %}
+
+        <div class="detail-info-card" style="padding:1.25rem;">
+            <a href="https://www.imdb.com/title/{{ movie.imdbID }}/" target="_blank" class="btn btn-ghost" style="width:100%; justify-content:center; margin-bottom:0.75rem;">
+                🔗 Auf IMDb ansehen
+            </a>
+            {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'movie_add' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="title" value="{{ movie.Title }}">
+                <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center;">
+                    + Zu meiner Liste hinzufügen
+                </button>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-ghost" style="width:100%; justify-content:center;">
+                Login um Film hinzuzufügen
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT: Details -->
+    <div>
+        <div class="detail-info-card">
+            <h1 class="detail-title">{{ movie.Title }}</h1>
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1rem;">{{ movie.Year }} · {{ movie.Runtime }}</p>
+
+            <span class="rating-badge" style="display:inline-flex; margin-bottom:1.25rem;">⭐ {{ movie.imdbRating }} IMDb</span>
+
+            <p style="color:var(--text); line-height:1.7; font-size:0.9rem; margin-bottom:1.25rem;">{{ movie.Plot }}</p>
+
+            <hr class="divider" style="margin:1rem 0;">
+
+            <div class="detail-field">
+                <span class="detail-field-label">Genre</span>
+                <span class="detail-field-value">{{ movie.Genre }}</span>
+            </div>
+            <div class="detail-field">
+                <span class="detail-field-label">Regisseur</span>
+                <span class="detail-field-value">{{ movie.Director }}</span>
+            </div>
+            <div class="detail-field">
+                <span class="detail-field-label">Schauspieler</span>
+                <span class="detail-field-value">{{ movie.Actors }}</span>
+            </div>
+            <div class="detail-field">
+                <span class="detail-field-label">Sprache</span>
+                <span class="detail-field-value">{{ movie.Language }}</span>
+            </div>
+            <div class="detail-field">
+                <span class="detail-field-label">Land</span>
+                <span class="detail-field-value">{{ movie.Country }}</span>
+            </div>
+            {% if movie.Awards and movie.Awards != 'N/A' %}
+            <div class="detail-field">
+                <span class="detail-field-label">Awards</span>
+                <span class="detail-field-value">{{ movie.Awards }}</span>
+            </div>
+            {% endif %}
+            <div class="detail-field">
+                <span class="detail-field-label">IMDb Votes</span>
+                <span class="detail-field-value">{{ movie.imdbVotes }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

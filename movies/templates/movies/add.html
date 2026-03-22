@@ -1,0 +1,51 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}– Film hinzufügen{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Film <em>hinzufügen</em></h1>
+    <p>Suche nach einem Film und füge ihn deiner Liste hinzu.</p>
+</div>
+
+<form method="POST" action="{% url 'movie_add' %}">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="search">
+    <div class="search-bar">
+        <input type="text" name="title" placeholder="Filmtitel eingeben..." autofocus>
+        <button type="submit" class="btn btn-gold">Suchen</button>
+    </div>
+</form>
+
+{% if movies %}
+    <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.5rem;">
+        {{ movies|length }} Ergebnis{{ movies|length|pluralize:"se" }} gefunden – wähle einen Film aus:
+    </p>
+    <div class="movie-grid">
+        {% for movie in movies %}
+        <div class="movie-card">
+            <a href="{% url 'temp_detail' movie.imdbID %}" style="text-decoration:none; color:inherit;">
+                <div class="movie-card-body">
+                    {% if movie.Poster and movie.Poster != 'N/A' %}
+                    <img src="{{ movie.Poster }}" alt="{{ movie.Title }}" style="width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:0.75rem;">
+                    {% endif %}
+                    <div class="movie-card-title">{{ movie.Title }}</div>
+                    <div class="movie-card-meta">{{ movie.Year }} · {{ movie.Type }}</div>
+                </div>
+            </a>
+            <div class="movie-card-footer">
+                <form method="POST" action="{% url 'movie_add' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add">
+                    <input type="hidden" name="title" value="{{ movie.Title }}">
+                    <button type="submit" class="btn btn-gold" style="font-size:0.8rem; padding:0.4rem 0.9rem;">
+                        + Hinzufügen
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% endblock %}

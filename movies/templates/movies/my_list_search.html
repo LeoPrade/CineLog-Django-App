@@ -1,0 +1,47 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}– Meine Liste durchsuchen{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Meine Liste <em>durchsuchen</em></h1>
+    <p>Durchsuche deine persönliche Filmsammlung.</p>
+</div>
+
+<form method="GET" action="{% url 'my_list_search' %}">
+    <div class="search-bar">
+        <input type="text" name="title" placeholder="Filmtitel eingeben..." value="{{ request.GET.title }}" autofocus>
+        <button type="submit" class="btn btn-gold">Suchen</button>
+    </div>
+</form>
+
+{% if request.GET.title %}
+    {% if movies %}
+    <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.5rem;">
+        {{ movies|length }} Ergebnis{{ movies|length|pluralize:"se" }} für „{{ request.GET.title }}"
+    </p>
+    <div class="movie-grid">
+        {% for movie in movies %}
+        <a href="{% url 'movie_detail' movie.id %}" class="movie-card">
+            <div class="movie-card-body">
+                <div class="movie-card-title">{{ movie.title }}</div>
+                <div class="movie-card-meta">{{ movie.director }} · {{ movie.release_year }}</div>
+                <span class="genre-tag">{{ movie.genre|truncatechars:30 }}</span>
+            </div>
+            <div class="movie-card-footer">
+                <span class="rating-badge">⭐ {{ movie.imdb_rating }}</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">{{ movie.imdb_votes|default:"–" }} Votes</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h3>Kein Film gefunden</h3>
+        <p>„{{ request.GET.title }}" ist nicht in deiner Sammlung.</p>
+        <a href="{% url 'movie_search' %}" class="btn btn-gold" style="margin-top:1.5rem">Neuen Film suchen</a>
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

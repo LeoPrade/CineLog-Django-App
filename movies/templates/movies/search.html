@@ -1,0 +1,60 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}– Filme suchen{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Filme <em>suchen</em></h1>
+    <p>Suche nach einem Film über die OMDb Datenbank.</p>
+</div>
+
+<form method="POST" action="{% url 'movie_search' %}">
+    {% csrf_token %}
+    <div class="search-bar">
+        <input type="text" name="title" placeholder="Filmtitel eingeben..." autofocus>
+        <button type="submit" class="btn btn-gold">Suchen</button>
+    </div>
+</form>
+
+{% if movies %}
+    <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.5rem;">
+        {{ movies|length }} Ergebnis{{ movies|length|pluralize:"se" }} gefunden
+    </p>
+    <div class="movie-grid">
+        {% for movie in movies %}
+        <div class="movie-card">
+            <div class="movie-card-body">
+                {% if movie.Poster and movie.Poster != 'N/A' %}
+                <img src="{{ movie.Poster }}" alt="{{ movie.Title }}" style="width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:0.75rem;">
+                {% endif %}
+                <div class="movie-card-title">{{ movie.Title }}</div>
+                <div class="movie-card-meta">{{ movie.Year }} · {{ movie.Type }}</div>
+            </div>
+            <div class="movie-card-footer">
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'movie_add' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="title" value="{{ movie.Title }}">
+                    <button type="submit" class="btn btn-gold" style="font-size:0.8rem; padding:0.4rem 0.9rem;">
+                        + Hinzufügen
+                    </button>
+                </form>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-ghost" style="font-size:0.8rem;">
+                    Login zum Hinzufügen
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% elif movies is not None %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h3>Kein Film gefunden</h3>
+        <p>Versuche einen anderen Titel.</p>
+    </div>
+{% endif %}
+
+{% endblock %}
