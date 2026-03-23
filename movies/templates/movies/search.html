@@ -23,17 +23,20 @@
     <div class="movie-grid">
         {% for movie in movies %}
         <div class="movie-card">
-            <div class="movie-card-body">
-                {% if movie.Poster and movie.Poster != 'N/A' %}
-                <img src="{{ movie.Poster }}" alt="{{ movie.Title }}" style="width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:0.75rem;">
-                {% endif %}
-                <div class="movie-card-title">{{ movie.Title }}</div>
-                <div class="movie-card-meta">{{ movie.Year }} · {{ movie.Type }}</div>
-            </div>
+            <a href="{% url 'temp_detail' movie.imdbID %}" style="text-decoration:none; color:inherit;">
+                <div class="movie-card-body">
+                    {% if movie.Poster and movie.Poster != 'N/A' %}
+                    <img src="{{ movie.Poster }}" alt="{{ movie.Title }}" style="width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:0.75rem;">
+                    {% endif %}
+                    <div class="movie-card-title">{{ movie.Title }}</div>
+                    <div class="movie-card-meta">{{ movie.Year }} · {{ movie.Type }}</div>
+                </div>
+            </a>
             <div class="movie-card-footer">
                 {% if user.is_authenticated %}
                 <form method="POST" action="{% url 'movie_add' %}">
                     {% csrf_token %}
+                    <input type="hidden" name="action" value="add">
                     <input type="hidden" name="title" value="{{ movie.Title }}">
                     <button type="submit" class="btn btn-gold" style="font-size:0.8rem; padding:0.4rem 0.9rem;">
                         + Hinzufügen

@@ -481,12 +481,12 @@
                 {% csrf_token %}
                 <button type="submit" class="btn btn-ghost">Logout</button>
             </form>
-            <a href="{% url 'movie_add' %}" class="btn btn-gold" style="margin-left:0.25rem">+ Film hinzufügen</a>
+            <a href="{% url 'movie_add' %}" class="btn btn-gold" style="margin-left:0.25rem; color:#0a0a0f;">+ Film hinzufügen</a>
         {% else %}
             <a href="{% url 'movie_list' %}">Meine Filme</a>
             <a href="{% url 'movie_search' %}">Filme suchen</a>
             <a href="{% url 'login' %}" class="btn btn-ghost">Login</a>
-            <a href="{% url 'register' %}" class="btn btn-gold" style="margin-left:0.25rem">Registrieren</a>
+            <a href="{% url 'register' %}" class="btn btn-gold" style="margin-left:0.25rem; color:#0a0a0f;">Registrieren</a>
         {% endif %}
     </div>
     </nav>

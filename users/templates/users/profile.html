@@ -24,11 +24,9 @@
                 <p style="color:var(--text-muted); font-size:0.875rem;">{{ request.user.email }}</p>
             </div>
 
-            <hr class="divider">
-
             {% if profile.bio %}
-            <p style="color:var(--text); font-style:italic; line-height:1.7; font-size:0.9rem; margin-bottom:1rem;">„{{ profile.bio }}"</p>
             <hr class="divider">
+            <p style="color:var(--text); font-style:italic; line-height:1.7; font-size:0.9rem; margin-bottom:1rem;">„{{ profile.bio }}"</p>
             {% endif %}
 
             {% if profile.favorite_genre %}
@@ -55,6 +53,14 @@
                 <span class="detail-field-value">{{ profile.favorite_director }}</span>
             </div>
             {% endif %}
+
+            {% if profile.bio or profile.favorite_genre or profile.favorite_movie or profile.favorite_actor or profile.favorite_director %}
+            <hr class="divider">
+            {% endif %}
+
+            <a href="{% url 'password_change' %}" class="btn btn-ghost" style="width:100%; justify-content:center;">
+                🔒 Passwort ändern
+            </a>
         </div>
     </div>
 

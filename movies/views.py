@@ -3,6 +3,7 @@ from .models import Movie, Review
 from .utils import get_movie_from_omdb, search_movies_from_omdb, get_movie_from_id
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 def movie_list(request):
     if request.user.is_authenticated:
@@ -10,9 +11,22 @@ def movie_list(request):
         search_word = request.GET.get('title', '')
         if search_word:
             movies = movies.filter(title__icontains=search_word)
+        sort = request.GET.get('sort', '')
+        if sort == 'imdb_rating':
+            movies = movies.order_by('-imdb_rating')
+        elif sort == 'personal_rating':
+            movies = movies.order_by('-review__personal_rating')
+        elif sort == 'newest':
+            movies = movies.order_by('-review__created_at')
+        elif sort == 'title':
+            movies = movies.order_by('title')
         reviews = Review.objects.filter(user=request.user)
+        paginator = Paginator(movies, 9)
+        page_number = request.GET.get('page')
+        movies = paginator.get_page(page_number)
     else:
         movies = []
+        reviews = []
     return render(request, 'movies/index.html', {'movies': movies, 'reviews': reviews})
 
 @login_required
@@ -27,8 +41,6 @@ def movie_add(request):
         if data is None:
             return render(request, 'movies/add.html')
         movies = data['Search']
-        print(movies)
-        print(len(movies))
         return render(request, 'movies/add.html', {'movies': movies})
     
     elif action == 'add':
@@ -46,23 +58,23 @@ def movie_add(request):
             imdb_rating_to_float = 0
         
         movie, created = Movie.objects.get_or_create(
-            imdb_id = data['imdbID'],
-            defaults = {
-                'title' : data['Title'],
-                'genre' : data['Genre'],
-                'release_year' : data['Year'],    
-                'director' : data['Director'],
-                'awards' : data['Awards'],
-                'imdb_votes' : imdb_votes_to_int,
-                'imdb_id' : data['imdbID'],
-                'imdb_rating' : imdb_rating_to_float,
+            imdb_id=data['imdbID'],
+            defaults={
+                'title': data['Title'],
+                'genre': data['Genre'],
+                'release_year': data['Year'],
+                'director': data['Director'],
+                'awards': data['Awards'],
+                'imdb_votes': imdb_votes_to_int,
+                'imdb_id': data['imdbID'],
+                'imdb_rating': imdb_rating_to_float,
                 'poster_url': data['Poster'] if data['Poster'] != 'N/A' else None,
-                }
+            }
         )
         
         review, created = Review.objects.get_or_create(
-            movie = movie,
-            user = request.user
+            movie=movie,
+            user=request.user
         )
         
         if not created:
@@ -70,7 +82,7 @@ def movie_add(request):
             return redirect('movie_list')
         
         return redirect('movie_list')
-    
+
 def movie_search(request):
     if request.method == 'GET': 
         return render(request, 'movies/search.html')

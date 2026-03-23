@@ -6,17 +6,25 @@
 <div class="page-header" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
     <div>
         <h1>Meine <em>Filmliste</em></h1>
-        <p>{{ movies|length }} Film{{ movies|length|pluralize:"e" }} in deiner Sammlung</p>
+        <p>{{ movies.paginator.count }} Film{{ movies.paginator.count|pluralize:"e" }} in deiner Sammlung</p>
     </div>
-    <a href="{% url 'movie_add' %}" class="btn btn-gold">+ Film hinzufügen</a>
+    <a href="{% url 'movie_add' %}" class="btn btn-gold" style="color:#0a0a0f;">+ Film hinzufügen</a>
 </div>
 
+<!-- Search & Sort Bar -->
 <form method="GET" action="{% url 'movie_list' %}">
-    <div class="search-bar">
-        <input type="text" name="title" placeholder="In meiner Liste suchen..." value="{{ request.GET.title }}" >
+    <div style="display:flex; gap:0.75rem; margin-bottom:2rem; flex-wrap:wrap; align-items:center;">
+        <input type="text" name="title" placeholder="In meiner Liste suchen..." value="{{ request.GET.title }}" style="flex:1; min-width:200px;">
+        <select name="sort" onchange="this.form.submit()" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.875rem; padding:0.75rem 1.25rem; cursor:pointer; outline:none; width:220px;">
+            <option value="" {% if not request.GET.sort %}selected{% endif %}>Sortieren nach...</option>
+            <option value="imdb_rating" {% if request.GET.sort == 'imdb_rating' %}selected{% endif %}>⭐ IMDb Rating</option>
+            <option value="personal_rating" {% if request.GET.sort == 'personal_rating' %}selected{% endif %}>🎬 Meine Bewertung</option>
+            <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>🕐 Neueste zuerst</option>
+            <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>🔤 Titel A–Z</option>
+        </select>
         <button type="submit" class="btn btn-ghost">Suchen</button>
-        {% if request.GET.title %}
-        <a href="{% url 'movie_list' %}" class="btn btn-ghost">✕ Zurücksetzen</a>
+        {% if request.GET.title or request.GET.sort %}
+        <a href="{% url 'movie_list' %}" class="btn btn-ghost">✕</a>
         {% endif %}
     </div>
 </form>
@@ -27,7 +35,7 @@
     <a href="{% url 'movie_detail' movie.id %}" class="movie-card">
         <div class="movie-card-body">
             {% if movie.poster_url %}
-                <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" style="width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:0.75rem;">
+            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" style="width:100%; height:180px; object-fit:cover; border-radius:8px; margin-bottom:0.75rem;">
             {% endif %}
             <div class="movie-card-title">{{ movie.title }}</div>
             <div class="movie-card-meta">{{ movie.director }} · {{ movie.release_year }}</div>
@@ -53,6 +61,31 @@
     </a>
     {% endfor %}
 </div>
+
+<!-- Pagination -->
+{% if movies.has_other_pages %}
+<div style="display:flex; justify-content:center; align-items:center; gap:0.5rem; margin-top:2.5rem;">
+    {% if movies.has_previous %}
+    <a href="?page={{ movies.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.title %}&title={{ request.GET.title }}{% endif %}" class="btn btn-ghost">← Zurück</a>
+    {% endif %}
+
+    {% for num in movies.paginator.page_range %}
+        {% if movies.number == num %}
+        <span class="btn btn-gold" style="min-width:40px; justify-content:center;">{{ num }}</span>
+        {% elif num > movies.number|add:'-3' and num < movies.number|add:'3' %}
+        <a href="?page={{ num }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.title %}&title={{ request.GET.title }}{% endif %}" class="btn btn-ghost" style="min-width:40px; justify-content:center;">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if movies.has_next %}
+    <a href="?page={{ movies.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.title %}&title={{ request.GET.title }}{% endif %}" class="btn btn-ghost">Weiter →</a>
+    {% endif %}
+</div>
+<p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:0.75rem;">
+    Seite {{ movies.number }} von {{ movies.paginator.num_pages }}
+</p>
+{% endif %}
+
 {% else %}
 <div class="empty-state">
     <div class="empty-state-icon">🎬</div>
@@ -63,7 +96,7 @@
     {% else %}
     <h3>Noch keine Filme</h3>
     <p>Füge deinen ersten Film hinzu und starte deine Sammlung.</p>
-    <a href="{% url 'movie_search' %}" class="btn btn-gold" style="margin-top:1.5rem">Film suchen</a>
+    <a href="{% url 'movie_add' %}" class="btn btn-gold" style="margin-top:1.5rem">Film suchen</a>
     {% endif %}
 </div>
 {% endif %}
